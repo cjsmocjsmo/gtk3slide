@@ -1,6 +1,7 @@
 import os
 import hashlib
 import sqlite3
+import time
 from pprint import pprint
 
 # IMG_PATH = "/media/whitepi/foo/Master_HPics"
@@ -32,6 +33,7 @@ def image_hash(file_name):
     else:
         raise ValueError("File does not end with .jpg")
 
+start = time.time()
 conn = sqlite3.connect(DB_FILE)
 cursor = conn.cursor()
 
@@ -60,3 +62,7 @@ for image in images:
     ''', (image, idx, size, hash))
 conn.commit()
 conn.close()
+end = time.time()
+elapsed = end - start
+minutes, seconds = divmod(elapsed, 60)
+print(f"Elapsed time: {int(minutes):02}:{int(seconds):02}")
