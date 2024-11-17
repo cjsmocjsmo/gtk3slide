@@ -40,23 +40,23 @@ cursor.execute('''
 CREATE TABLE IF NOT EXISTS imageData (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     image_path TEXT NOT NULL,
-    count TEXT NOT NULL,
+    idx INTIGER NOT NULL,
     hash TEXT NOT NULL
 )
 ''')
 
 images = find_images(IMG_PATH)
-count = 0
+idx = 0
 for image in images:
-    count += 1
+    idx += 1
     size = image_size(image)
     hash = image_hash(image)
-    print(image)
-    print(count)
+    # print(image)
+    print(idx)
     print(size)
     print(hash)
     cursor.execute('''
-    INSERT INTO imageData (image_path, count, hash) VALUES (?, ?, ?)
-    ''', (image, count, hash))
+    INSERT INTO imageData (image_path, idx, size, hash) VALUES (?, ?, ?)
+    ''', (image, idx, size, hash))
 conn.commit()
 conn.close()
