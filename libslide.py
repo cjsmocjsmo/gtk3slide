@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS imageData (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     image_path TEXT NOT NULL,
     idx INTIGER NOT NULL,
+    size INTEGER NOT NULL,
     hash TEXT NOT NULL
 )
 ''')
