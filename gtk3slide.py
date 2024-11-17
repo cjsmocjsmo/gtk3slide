@@ -54,7 +54,7 @@ class PhotoViewer(Gtk.Window):
     def __init__(self):
         super().__init__(title="Photo Viewer")
 
-        self.set_default_size(1064, 800)
+        self.set_default_size(1596, 1200)
         self.fullscreen()
 
         # Create a CSS provider and set the background color to black
