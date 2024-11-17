@@ -59,7 +59,7 @@ for image in images:
     print(size)
     print(hash)
     cursor.execute('''
-    INSERT INTO imageData (image_path, idx, size, hash) VALUES (?, ?, ?)
+    INSERT INTO imageData (image_path, idx, size, hash) VALUES (?, ?, ?, ?)
     ''', (image, idx, size, hash))
 conn.commit()
 conn.close()
