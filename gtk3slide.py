@@ -73,7 +73,7 @@ class PhotoViewer(Gtk.Window):
         self.image = Gtk.Image()
         self.add(self.image)
 
-        self.photos_dir = "/home/whitepi/Master_HPics"  # Replace with your directory
+        self.photos_dir = "/media/whitepi/foo/Master_HPics"  # Replace with your directory
         self.photos = os.listdir(self.photos_dir)
 
         self.current_photo = 0
