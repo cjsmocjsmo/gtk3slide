@@ -1,5 +1,6 @@
 import os
 import hashlib
+import sqlite3
 from pprint import pprint
 
 IMG_PATH = "/media/whitepi/foo/Master_HPics"
@@ -30,6 +31,23 @@ def image_hash(file_name):
     else:
         raise ValueError("File does not end with .jpg")
 
+conn = sqlite3.connect(DB_FILE)
+cursor = conn.cursor()
+
+# Create the table if it doesn't exist
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS imageData (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    image_path TEXT NOT NULL,
+    count TEXT NOT NULL,
+    hash TEXT NOT NULL
+)
+''')
+
 images = find_images(IMG_PATH)
+count = 0
 for image in images:
-    print(image, image_size(image), image_hash(image))
+    count += 1
+    size = image_size(str(image))
+    hash = image_hash(image)
+    pprint(image, count, size, hash)
