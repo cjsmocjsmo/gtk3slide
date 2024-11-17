@@ -48,6 +48,9 @@ images = find_images(IMG_PATH)
 count = 0
 for image in images:
     count += 1
-    size = image_size(str(image))
+    size = image_size(image)
     hash = image_hash(image)
-    pprint(image, count, size, hash)
+    print(image)
+    print(count)
+    print(size)
+    print(hash)
