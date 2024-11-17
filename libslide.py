@@ -32,4 +32,4 @@ def image_hash(file_name):
 
 images = find_images(IMG_PATH)
 for image in images:
-    pprint(image, image_size(image), image_hash(image))
+    print(image, image_size(image), image_hash(image))
