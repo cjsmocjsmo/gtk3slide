@@ -54,3 +54,6 @@ for image in images:
     print(count)
     print(size)
     print(hash)
+    cursor.execute('''
+    INSERT INTO imageData (image_path, count, hash) VALUES (?, ?, ?)
+    ''', (image, count, hash))
