@@ -4,7 +4,7 @@ import sqlite3
 from pprint import pprint
 
 IMG_PATH = "/media/whitepi/foo/Master_HPics"
-DB_FILE = "/media/whitepi/foo/imageData.db"
+DB_FILE = "/home/whitepi/gtk3slide/gtk3slide/imageData.db"
 
 
 def find_images(IMG_PATH):
@@ -57,3 +57,5 @@ for image in images:
     cursor.execute('''
     INSERT INTO imageData (image_path, count, hash) VALUES (?, ?, ?)
     ''', (image, count, hash))
+conn.commit()
+conn.close()
