@@ -3,7 +3,8 @@ import hashlib
 import sqlite3
 from pprint import pprint
 
-IMG_PATH = "/media/whitepi/foo/Master_HPics"
+# IMG_PATH = "/media/whitepi/foo/Master_HPics"
+IMG_PATH = "/media/whitepi/foo"
 DB_FILE = "/home/whitepi/gtk3slide/gtk3slide/imageData.db"
 
 
