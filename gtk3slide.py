@@ -142,6 +142,8 @@ if __name__ == "__main__":
         setup(DB_FILE, IMG_PATH)
         conn.commit()
         conn.close()
+    
+    max_idx = 0
     if os.path.exists(DB_FILE):
         try:
             conn = sqlite3.connect(DB_FILE)
