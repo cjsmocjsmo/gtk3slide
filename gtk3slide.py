@@ -142,7 +142,7 @@ if __name__ == "__main__":
         setup(DB_FILE, IMG_PATH)
         conn.commit()
         conn.close()
-    else:
+    if os.path.exists(DB_FILE):
         try:
             conn = sqlite3.connect(DB_FILE)
             cursor = conn.cursor()
@@ -150,7 +150,7 @@ if __name__ == "__main__":
             max_idx = cursor.fetchone()[0]
             conn.close()
             print(f"Database already exists\nThere are {max_idx} entries in the db")
-        except sqlite3.OperationalError as e:
+        except sqlite3.OperationalError:
             print(f"The database file exists\nHOWEVER IT IS EMPTY\nRunning setup")
             create_tables(cursor)
             conn.commit()
@@ -158,8 +158,8 @@ if __name__ == "__main__":
             conn.commit()
             conn.close()
 
-    window = PhotoViewer(DB_FILE)
-    window.connect("delete-event", Gtk.main_quit)
-    window.show_all()
-    window.show_next_photo()
-    Gtk.main()
+    # window = PhotoViewer(DB_FILE)
+    # window.connect("delete-event", Gtk.main_quit)
+    # window.show_all()
+    # window.show_next_photo()
+    # Gtk.main()
