@@ -1,3 +1,4 @@
+gi.require_version('Gtk', '3.0')
 import gi
 import os
 import sqlite3
@@ -102,6 +103,14 @@ def image_hash(file_name):
     else:
         raise ValueError("File does not end with .jpg")
 
+
+def create_db_file(dbfile):
+    if not os.path.exists(dbfile):
+        with open(dbfile, 'a'):
+            os.utime(dbfile, None) 
+        
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Photo Viewer")
     parser.add_argument('-i', '--images', required=True, help="Path to the images directory")
@@ -112,14 +121,20 @@ if __name__ == "__main__":
     DB_FILE = args.database
 
     if not os.path.exists(DB_FILE):
+        create_db_file(DB_FILE)
         setup(DB_FILE, IMG_PATH)
     else:
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute('SELECT MAX(idx) FROM imageData')
-        max_idx = cursor.fetchone()[0]
-        conn.close()
-        print(f"Database already exists\nThere are {max_idx} entries in the db")
+        try:
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute('SELECT MAX(idx) FROM imageData')
+            max_idx = cursor.fetchone()[0]
+            conn.close()
+            print(f"Database already exists\nThere are {max_idx} entries in the db")
+        except sqlite3.OperationalError:
+            print(f"Database already exists HOWEVER IT IS EMPTY\nRunning setup")
+            setup(DB_FILE, IMG_PATH)
+        
 
     window = PhotoViewer(IMG_PATH)
     window.connect("delete-event", Gtk.main_quit)
