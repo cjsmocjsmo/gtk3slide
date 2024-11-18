@@ -1,5 +1,4 @@
 import gi
-gi.require_version('Gtk', '3.0')
 import os
 import sqlite3
 import hashlib
@@ -9,23 +8,36 @@ from gi.repository import Gtk, GdkPixbuf, GLib
 gi.require_version('Gtk', '3.0')
 
 class PhotoViewer(Gtk.Window):
-    def __init__(self, photos_dir):
+    def __init__(self, db_file):
         super().__init__(title="Photo Viewer")
 
         self.image = Gtk.Image()
         self.set_default_size(800, 600)
         self.add(self.image)
 
-        self.photos_dir = photos_dir
-        self.photos = os.listdir(self.photos_dir)
-
+        self.db_file = db_file
         self.current_photo = 0
 
         # Open the window in fullscreen mode
         self.fullscreen()
 
-    def show_next_photo(self):
-        photo_path = os.path.join(self.photos_dir, self.photos[self.current_photo])
+        # Show the first image
+        self.show_photo(self.current_photo)
+
+    def get_photo_path(self, idx):
+        conn = sqlite3.connect(self.db_file)
+        cursor = conn.cursor()
+        cursor.execute('SELECT image_path FROM imageData WHERE idx = ?', (idx,))
+        result = cursor.fetchone()
+        conn.close()
+        return result[0] if result else None
+
+    def show_photo(self, idx):
+        photo_path = self.get_photo_path(idx)
+        if not photo_path:
+            print("No photo found for idx:", idx)
+            return
+
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(photo_path)
 
         # Create a new pixbuf with a black background
@@ -37,17 +49,26 @@ class PhotoViewer(Gtk.Window):
         # Set the pixbuf to the image widget
         self.image.set_from_pixbuf(new_pixbuf)
 
+    def show_next_photo(self):
+        self.current_photo += 1
+        self.show_photo(self.current_photo)
+
         # Schedule the next photo change
         GLib.timeout_add(11000, self.show_next_photo)  # 11 seconds for the animation to finish
 
-        self.current_photo = (self.current_photo + 1) % len(self.photos)
-
-def setup(cursor, db_file, img_path):
+def setup(db_file, img_path):
+    conn = sqlite3.connect(db_file)
+    cursor = conn.cursor()
     if not os.path.exists(db_file):
+        create_tables(cursor)
+        conn.commit()
         insert_data(cursor, img_path)
+        conn.commit()
+        conn.close()
     else:
         cursor.execute('SELECT MAX(idx) FROM imageData')
         max_idx = cursor.fetchone()[0]
+        conn.close()
         print(f"Database already exists\nThere are {max_idx} entries in the db")
 
 def create_tables(cursor):
@@ -96,13 +117,10 @@ def image_hash(file_name):
     else:
         raise ValueError("File does not end with .jpg")
 
-
 def create_db_file(dbfile):
     if not os.path.exists(dbfile):
         with open(dbfile, 'a'):
-            os.utime(dbfile, None) 
-        
-
+            os.utime(dbfile, None)  # Update the file's access and modification times
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Photo Viewer")
@@ -113,15 +131,10 @@ if __name__ == "__main__":
     IMG_PATH = args.images
     DB_FILE = args.database
 
+    create_db_file(DB_FILE)
+
     if not os.path.exists(DB_FILE):
-        create_db_file(DB_FILE)
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        create_tables(cursor)
-        conn.commit()
-        setup(cursor, DB_FILE, IMG_PATH)
-        conn.commit()
-        conn.close()
+        setup(DB_FILE, IMG_PATH)
     else:
         try:
             conn = sqlite3.connect(DB_FILE)
@@ -130,12 +143,10 @@ if __name__ == "__main__":
             max_idx = cursor.fetchone()[0]
             conn.close()
             print(f"Database already exists\nThere are {max_idx} entries in the db")
-        except sqlite3.OperationalError:
-            print(f"Database already exists HOWEVER IT IS EMPTY\nRunning setup")
-            setup(DB_FILE, IMG_PATH)
-        
+        except sqlite3.Error as e:
+            print(f"SQLite error: {e}")
 
-    window = PhotoViewer(IMG_PATH)
+    window = PhotoViewer(DB_FILE)
     window.connect("delete-event", Gtk.main_quit)
     window.show_all()
     window.show_next_photo()
