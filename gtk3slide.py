@@ -152,6 +152,11 @@ if __name__ == "__main__":
             max_idx = cursor.fetchone()[0]
             conn.close()
             print(f"Database already exists\nThere are {max_idx} entries in the db")
+            create_tables(cursor)
+            conn.commit()
+            setup(DB_FILE, IMG_PATH)
+            conn.commit()
+            conn.close()
         except sqlite3.OperationalError:
             print(f"The database file exists\nHOWEVER IT IS EMPTY\nRunning setup")
             create_tables(cursor)
