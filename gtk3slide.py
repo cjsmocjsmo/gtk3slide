@@ -42,19 +42,12 @@ class PhotoViewer(Gtk.Window):
 
         self.current_photo = (self.current_photo + 1) % len(self.photos)
 
-def setup(db_file, img_path):
-    conn = sqlite3.connect(db_file)
-    cursor = conn.cursor()
+def setup(cursor, db_file, img_path):
     if not os.path.exists(db_file):
-        create_tables(cursor)
-        conn.commit()
         insert_data(cursor, img_path)
-        conn.commit()
-        conn.close()
     else:
         cursor.execute('SELECT MAX(idx) FROM imageData')
         max_idx = cursor.fetchone()[0]
-        conn.close()
         print(f"Database already exists\nThere are {max_idx} entries in the db")
 
 def create_tables(cursor):
@@ -122,7 +115,13 @@ if __name__ == "__main__":
 
     if not os.path.exists(DB_FILE):
         create_db_file(DB_FILE)
-        setup(DB_FILE, IMG_PATH)
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        create_tables(cursor)
+        conn.commit()
+        setup(cursor, DB_FILE, IMG_PATH)
+        conn.commit()
+        conn.close()
     else:
         try:
             conn = sqlite3.connect(DB_FILE)
