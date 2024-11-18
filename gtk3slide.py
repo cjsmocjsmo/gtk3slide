@@ -1,5 +1,5 @@
-gi.require_version('Gtk', '3.0')
 import gi
+gi.require_version('Gtk', '3.0')
 import os
 import sqlite3
 import hashlib
