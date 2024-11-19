@@ -34,10 +34,13 @@ class PhotoViewer(Gtk.Window):
         self.fullscreen()
 
         # Hide the cursor
-        self.hide_cursor()
+        self.connect("realize", self.on_realize)
 
         # Show the first image
         self.show_photo(self.current_photo)
+
+    def on_realize(self, widget):
+        self.hide_cursor()
 
     def hide_cursor(self):
         cursor = Gdk.Cursor.new_for_display(Gdk.Display.get_default(), Gdk.CursorType.BLANK_CURSOR)
