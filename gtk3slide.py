@@ -152,7 +152,7 @@ if __name__ == "__main__":
             print(f"Database already exists\nThere are {max_idx} entries in the db")
         except sqlite3.OperationalError as e:
             print(f"SQLite error: {e}")
-            create_tables(conn, cursor, DB_FILE)
+            create_tables(conn, cursor)
             insert_data(cursor, IMG_PATH)
             conn.commit()
             conn.close()
