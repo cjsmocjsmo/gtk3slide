@@ -16,7 +16,7 @@ class PhotoViewer(Gtk.Window):
         self.add(self.image)
 
         self.db_file = db_file
-        self.current_photo = 0
+        self.current_photo = 1
 
         # Open the window in fullscreen mode
         self.fullscreen()
@@ -165,8 +165,8 @@ if __name__ == "__main__":
             conn.commit()
             conn.close()
 
-    # window = PhotoViewer(DB_FILE)
-    # window.connect("delete-event", Gtk.main_quit)
-    # window.show_all()
-    # window.show_next_photo()
-    # Gtk.main()
+    window = PhotoViewer(DB_FILE)
+    window.connect("delete-event", Gtk.main_quit)
+    window.show_all()
+    window.show_next_photo()
+    Gtk.main()
