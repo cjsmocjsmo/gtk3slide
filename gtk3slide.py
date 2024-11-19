@@ -87,6 +87,7 @@ def insert_data(cursor, img_path):
     idx = 0
     for image in images:
         idx += 1
+        print(idx)
         size = image_size(image)
         hash_value = image_hash(image)
         cursor.execute('''
