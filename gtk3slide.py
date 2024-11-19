@@ -1,9 +1,9 @@
-gi.require_version('Gtk', '3.0')
 import gi
 import os
 import sqlite3
 import hashlib
 import argparse
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, GLib, Gdk
 
 gi.require_version('Gtk', '3.0')
