@@ -1,3 +1,4 @@
+gi.require_version('Gtk', '3.0')
 import gi
 import os
 import sqlite3
@@ -77,10 +78,14 @@ def setup(db_file, img_path):
         conn.commit()
         conn.close()
     else:
-        cursor.execute('SELECT MAX(idx) FROM imageData')
-        max_idx = cursor.fetchone()[0]
-        conn.close()
-        print(f"Database already exists\nThere are {max_idx} entries in the db")
+        try:
+            cursor.execute('SELECT MAX(idx) FROM imageData')
+            max_idx = cursor.fetchone()[0]
+            conn.close()
+            print(f"Database already exists\nThere are {max_idx} entries in the db")
+        except sqlite3.OperationalError as e:
+            print(f"SQLite error: {e}")
+            conn.close()
 
 def create_tables(cursor):
     cursor.execute('''
@@ -143,20 +148,11 @@ if __name__ == "__main__":
     IMG_PATH = args.images
     DB_FILE = args.database
 
-    create_db_file(DB_FILE)
-
     if not os.path.exists(DB_FILE):
+        create_db_file(DB_FILE)
         setup(DB_FILE, IMG_PATH)
     else:
-        try:
-            conn = sqlite3.connect(DB_FILE)
-            cursor = conn.cursor()
-            cursor.execute('SELECT MAX(idx) FROM imageData')
-            max_idx = cursor.fetchone()[0]
-            conn.close()
-            print(f"Database already exists\nThere are {max_idx} entries in the db")
-        except sqlite3.Error as e:
-            print(f"SQLite error: {e}")
+        setup(DB_FILE, IMG_PATH)
 
     window = PhotoViewer(DB_FILE)
     window.connect("delete-event", Gtk.main_quit)
