@@ -135,33 +135,42 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Photo Viewer")
     parser.add_argument('-i', '--images', required=True, help="Path to the images directory")
     parser.add_argument('-d', '--database', required=True, help="Path to the database file")
+    parser.add_argument('-r', '--resume', default=False, action='store_true', help="Resume from the last image")
     args = parser.parse_args()
 
     IMG_PATH = args.images
     DB_FILE = args.database
+    RESUME = args.resume
 
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
-    if not os.path.exists(DB_FILE):
-        create_db_file(DB_FILE)
-        create_tables(conn, cursor, DB_FILE)
-        insert_data(cursor, IMG_PATH)
+    if RESUME:
+        window = PhotoViewer(DB_FILE)
+        window.connect("delete-event", Gtk.main_quit)
+        window.show_all()
+        window.show_next_photo()
+        Gtk.main()
     else:
-        try:
-            cursor.execute('SELECT MAX(idx) FROM imageData')
-            max_idx = cursor.fetchone()[0]
-            conn.close()
-            print(f"Database already exists\nThere are {max_idx} entries in the db")
-        except sqlite3.OperationalError as e:
-            print(f"SQLite error: {e}")
-            create_tables(conn, cursor)
+        if not os.path.exists(DB_FILE):
+            create_db_file(DB_FILE)
+            create_tables(conn, cursor, DB_FILE)
             insert_data(cursor, IMG_PATH)
-            conn.commit()
-            conn.close()
+        else:
+            try:
+                cursor.execute('SELECT MAX(idx) FROM imageData')
+                max_idx = cursor.fetchone()[0]
+                conn.close()
+                print(f"Database already exists\nThere are {max_idx} entries in the db")
+            except sqlite3.OperationalError as e:
+                print(f"SQLite error: {e}")
+                create_tables(conn, cursor)
+                insert_data(cursor, IMG_PATH)
+                conn.commit()
+                conn.close()
 
-    window = PhotoViewer(DB_FILE)
-    window.connect("delete-event", Gtk.main_quit)
-    window.show_all()
-    window.show_next_photo()
-    Gtk.main()
+        window = PhotoViewer(DB_FILE)
+        window.connect("delete-event", Gtk.main_quit)
+        window.show_all()
+        window.show_next_photo()
+        Gtk.main()
