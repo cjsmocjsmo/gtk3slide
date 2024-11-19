@@ -68,26 +68,27 @@ class PhotoViewer(Gtk.Window):
         # Schedule the next photo change
         GLib.timeout_add(11000, self.show_next_photo)  # 11 seconds for the animation to finish
 
-def setup(db_file, img_path):
-    conn = sqlite3.connect(db_file)
-    cursor = conn.cursor()
-    if not os.path.exists(db_file):
-        create_tables(cursor)
-        conn.commit()
-        insert_data(cursor, img_path)
-        conn.commit()
-        conn.close()
-    else:
-        try:
-            cursor.execute('SELECT MAX(idx) FROM imageData')
-            max_idx = cursor.fetchone()[0]
-            conn.close()
-            print(f"Database already exists\nThere are {max_idx} entries in the db")
-        except sqlite3.OperationalError as e:
-            print(f"SQLite error: {e}")
-            conn.close()
+# def setup(conn, cursor, db_file, img_path):
+#     if not os.path.exists(db_file):
+#         create_tables(cursor)
+#         conn.commit()
+#         insert_data(cursor, img_path)
+#         conn.commit()
+#         conn.close()
+#     else:
+#         try:
+#             cursor.execute('SELECT MAX(idx) FROM imageData')
+#             max_idx = cursor.fetchone()[0]
+#             conn.close()
+#             print(f"Database already exists\nThere are {max_idx} entries in the db")
+#         except sqlite3.OperationalError as e:
+#             print(f"SQLite error: {e}")
+#             create_tables(conn, cursor, db_file)
+#             insert_data(cursor, img_path)
+#             conn.commit()
+#             conn.close()
 
-def create_tables(cursor):
+def create_tables(conn, cursor, db_file):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS imageData (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -97,6 +98,7 @@ def create_tables(cursor):
         hash TEXT NOT NULL
     )
     ''')
+    conn.commit()
 
 def insert_data(cursor, img_path):
     images = find_images(img_path)
@@ -148,11 +150,25 @@ if __name__ == "__main__":
     IMG_PATH = args.images
     DB_FILE = args.database
 
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
     if not os.path.exists(DB_FILE):
         create_db_file(DB_FILE)
-        setup(DB_FILE, IMG_PATH)
+        create_tables(conn, cursor, DB_FILE)
+        insert_data(cursor, IMG_PATH)
     else:
-        setup(DB_FILE, IMG_PATH)
+        try:
+            cursor.execute('SELECT MAX(idx) FROM imageData')
+            max_idx = cursor.fetchone()[0]
+            conn.close()
+            print(f"Database already exists\nThere are {max_idx} entries in the db")
+        except sqlite3.OperationalError as e:
+            print(f"SQLite error: {e}")
+            create_tables(conn, cursor, DB_FILE)
+            insert_data(cursor, IMG_PATH)
+            conn.commit()
+            conn.close()
 
     window = PhotoViewer(DB_FILE)
     window.connect("delete-event", Gtk.main_quit)
