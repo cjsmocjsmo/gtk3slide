@@ -3,7 +3,7 @@ import os
 import sqlite3
 import hashlib
 import argparse
-from gi.repository import Gtk, GdkPixbuf, GLib
+from gi.repository import Gtk, GdkPixbuf, GLib, Gdk
 
 gi.require_version('Gtk', '3.0')
 
@@ -17,6 +17,17 @@ class PhotoViewer(Gtk.Window):
 
         self.db_file = db_file
         self.current_photo = 1
+
+        # Apply CSS to set the background color to black
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_data(b"""
+        window {
+            background-color: black;
+        }
+        """)
+        screen = Gdk.Screen.get_default()
+        style_context = Gtk.StyleContext()
+        style_context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         # Open the window in fullscreen mode
         self.fullscreen()
@@ -59,17 +70,17 @@ class PhotoViewer(Gtk.Window):
 def setup(db_file, img_path):
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
-    # if not os.path.exists(db_file):
-    create_tables(cursor)
-    conn.commit()
-    insert_data(cursor, img_path)
-    conn.commit()
-    conn.close()
-    # else:
-    #     cursor.execute('SELECT MAX(idx) FROM imageData')
-    #     max_idx = cursor.fetchone()[0]
-    #     conn.close()
-    #     print(f"Database already exists\nThere are {max_idx} entries in the db")
+    if not os.path.exists(db_file):
+        create_tables(cursor)
+        conn.commit()
+        insert_data(cursor, img_path)
+        conn.commit()
+        conn.close()
+    else:
+        cursor.execute('SELECT MAX(idx) FROM imageData')
+        max_idx = cursor.fetchone()[0]
+        conn.close()
+        print(f"Database already exists\nThere are {max_idx} entries in the db")
 
 def create_tables(cursor):
     cursor.execute('''
@@ -135,17 +146,8 @@ if __name__ == "__main__":
     create_db_file(DB_FILE)
 
     if not os.path.exists(DB_FILE):
-        create_db_file(DB_FILE)
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        create_tables(cursor)
-        conn.commit()
         setup(DB_FILE, IMG_PATH)
-        conn.commit()
-        conn.close()
-    
-    max_idx = 0
-    if os.path.exists(DB_FILE):
+    else:
         try:
             conn = sqlite3.connect(DB_FILE)
             cursor = conn.cursor()
@@ -153,18 +155,8 @@ if __name__ == "__main__":
             max_idx = cursor.fetchone()[0]
             conn.close()
             print(f"Database already exists\nThere are {max_idx} entries in the db")
-            create_tables(cursor)
-            conn.commit()
-            setup(DB_FILE, IMG_PATH)
-            conn.commit()
-            conn.close()
-        except sqlite3.OperationalError:
-            print(f"The database file exists\nHOWEVER IT IS EMPTY\nRunning setup")
-            create_tables(cursor)
-            conn.commit()
-            setup(DB_FILE, IMG_PATH)
-            conn.commit()
-            conn.close()
+        except sqlite3.Error as e:
+            print(f"SQLite error: {e}")
 
     window = PhotoViewer(DB_FILE)
     window.connect("delete-event", Gtk.main_quit)
