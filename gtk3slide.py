@@ -150,22 +150,12 @@ if __name__ == "__main__":
         window.show_next_photo()
         Gtk.main()
     else:
-        if not os.path.exists(DB_FILE):
-            create_db_file(DB_FILE)
-            create_tables(conn, cursor, DB_FILE)
-            insert_data(cursor, IMG_PATH)
-        else:
-            try:
-                cursor.execute('SELECT MAX(idx) FROM imageData')
-                max_idx = cursor.fetchone()[0]
-                conn.close()
-                print(f"Database already exists\nThere are {max_idx} entries in the db")
-            except sqlite3.OperationalError as e:
-                print(f"SQLite error: {e}")
-                create_tables(conn, cursor)
-                insert_data(cursor, IMG_PATH)
-                conn.commit()
-                conn.close()
+        
+        create_db_file(DB_FILE)
+        create_tables(conn, cursor, DB_FILE)
+        insert_data(cursor, IMG_PATH)
+        conn.commit()
+        conn.close()
 
         window = PhotoViewer(DB_FILE)
         window.connect("delete-event", Gtk.main_quit)
