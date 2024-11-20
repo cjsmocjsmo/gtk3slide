@@ -152,7 +152,7 @@ if __name__ == "__main__":
         conn = sqlite3.connect(DB_FILE)
         cursor = conn.cursor()
         create_db_file(DB_FILE)
-        create_tables(conn, cursor, DB_FILE)
+        create_tables(conn, cursor)
         insert_data(cursor, IMG_PATH)
         conn.commit()
         conn.close()
