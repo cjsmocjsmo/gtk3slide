@@ -140,8 +140,7 @@ if __name__ == "__main__":
     IMG_PATH = args.images
     DB_FILE = args.database
 
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
+    
 
     if os.path.exists(DB_FILE):
         window = PhotoViewer(DB_FILE)
@@ -150,7 +149,8 @@ if __name__ == "__main__":
         window.show_next_photo()
         Gtk.main()
     else:
-        
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
         create_db_file(DB_FILE)
         create_tables(conn, cursor, DB_FILE)
         insert_data(cursor, IMG_PATH)
