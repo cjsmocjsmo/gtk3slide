@@ -133,19 +133,17 @@ def create_db_file(dbfile):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Photo Viewer")
-    parser.add_argument('-i', '--images', required=True, help="Path to the images directory")
-    parser.add_argument('-d', '--database', required=True, help="Path to the database file")
-    parser.add_argument('-r', '--resume', default=False, action='store_true', help="Resume from the last image")
+    parser.add_argument('-i', '--images', default="", required=False, help="Path to the images directory")
+    parser.add_argument('-d', '--database', default="", required=False, help="Path to the database file")
     args = parser.parse_args()
 
     IMG_PATH = args.images
     DB_FILE = args.database
-    RESUME = args.resume
 
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
-    if RESUME:
+    if os.path.exists(DB_FILE):
         window = PhotoViewer(DB_FILE)
         window.connect("delete-event", Gtk.main_quit)
         window.show_all()
