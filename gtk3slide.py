@@ -3,6 +3,7 @@ import os
 import sqlite3
 import hashlib
 import argparse
+import time
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, GLib, Gdk
 
@@ -132,6 +133,7 @@ def create_db_file(dbfile):
             os.utime(dbfile, None)  # Update the file's access and modification times
 
 if __name__ == "__main__":
+    start_time = time.time()
     parser = argparse.ArgumentParser(description="Photo Viewer")
     parser.add_argument('-i', '--images', default="", required=False, help="Path to the images directory")
     parser.add_argument('-d', '--database', default="", required=False, help="Path to the database file")
@@ -162,3 +164,7 @@ if __name__ == "__main__":
         window.show_all()
         window.show_next_photo()
         Gtk.main()
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Elapsed time: {elapsed_time:.2f} seconds")
