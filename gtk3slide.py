@@ -4,9 +4,10 @@ import sqlite3
 import hashlib
 import argparse
 import time
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, GLib, Gdk, cairo
 
-gi.require_version('Gtk', '3.0')
+
 
 class PhotoViewer(Gtk.Window):
     def __init__(self, db_file):
@@ -142,6 +143,7 @@ def insert_data(cursor, img_path):
     idx = 0
     for image in images:
         idx += 1
+        print(f'index {idx}')
         size = image_size(image)
         hash_value = image_hash(image)
         cursor.execute('''
