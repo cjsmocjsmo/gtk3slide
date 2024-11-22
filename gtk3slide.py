@@ -159,12 +159,14 @@ if __name__ == "__main__":
         conn.commit()
         conn.close()
 
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"Elapsed time: {elapsed_time:.2f} seconds")
+        
         window = PhotoViewer(DB_FILE)
         window.connect("delete-event", Gtk.main_quit)
         window.show_all()
         window.show_next_photo()
         Gtk.main()
 
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"Elapsed time: {elapsed_time:.2f} seconds")
+    
