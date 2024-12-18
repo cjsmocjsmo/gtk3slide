@@ -77,7 +77,8 @@ class PhotoViewer(Gtk.Window):
         self.show_photo(self.current_photo)
 
         # Schedule the next photo change
-        GLib.timeout_add(11000, self.show_next_photo)  # 11 seconds for the animation to finish
+        # GLib.timeout_add(11000, self.show_next_photo)  # 11 seconds for the animation to finish
+        GLib.timeout_add(5000, self.show_next_photo)
 
 def create_tables(conn, cursor):
     cursor.execute('''
